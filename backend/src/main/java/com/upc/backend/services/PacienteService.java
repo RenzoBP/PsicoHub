@@ -142,11 +142,10 @@ public class PacienteService implements IPacienteService {
             hayCambios = true;
         }
 
-        String passwordEncriptada = passwordEncoder.encode(pacienteDTO.getPassword());
-        // Actualizar contraseña si se proporciona
         if (pacienteDTO.getPassword() != null && !pacienteDTO.getPassword().trim().isEmpty()) {
-            usuarioExistente.setPassword(passwordEncriptada);
-            pacienteExistente.setPassword(passwordEncriptada);
+            String passwordCifrada = passwordEncoder.encode(pacienteDTO.getPassword());
+            usuarioExistente.setPassword(passwordCifrada);
+            pacienteExistente.setPassword(passwordCifrada);
             hayCambios = true;
         }
 

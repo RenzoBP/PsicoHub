@@ -111,7 +111,6 @@ export class PerfilPacienteComponent implements OnInit {
     this.errorMessage.set('');
     this.successMessage.set('');
 
-    // Preparar datos para actualizar (sin incluir DNI)
     const pacienteActualizado: Paciente = {
       ...pacienteActual,
       nombre: this.perfilForm.value.nombre!,
@@ -124,36 +123,44 @@ export class PerfilPacienteComponent implements OnInit {
       email: this.perfilForm.value.email!
     };
 
-    // Solo incluir password si fue ingresada
     const passwordValue = this.perfilForm.value.password?.trim();
     if (passwordValue && passwordValue.length > 0) {
       pacienteActualizado.password = passwordValue;
     }
 
-    // Llamar al servicio de modificación
+    //  Detectar si cambió email o password
+    const cambioCredenciales =
+      pacienteActualizado.email !== pacienteActual.email ||
+      passwordValue;
+
     this.pacienteService.modificar(pacienteActualizado).subscribe({
       next: (response) => {
         console.log('Perfil actualizado:', response);
-        console.log('email:', pacienteActualizado.email );
-        console.log('password:', pacienteActualizado.password);
-        localStorage.setItem('user_email', response.email);
-        this.successMessage.set('¡Perfil actualizado exitosamente!');
         this.isLoading.set(false);
-        this.paciente.set(response);
 
-        // Limpiar el campo de contraseña después de actualizar
-        this.perfilForm.patchValue({ password: '' });
+        //  Si cambió credenciales, cerrar sesión y redirigir
+        if (cambioCredenciales) {
+          this.successMessage.set('¡Perfil actualizado! Por seguridad, debes iniciar sesión nuevamente.');
 
-        // Opcional: Ocultar mensaje de éxito después de 5 segundos
-        setTimeout(() => {
-          this.successMessage.set('');
-        }, 5000);
+          setTimeout(() => {
+            this.authService.logout(); // Esto redirige a login automáticamente
+          }, 2500);
+        } else {
+          // Solo actualizar email si cambió sin cerrar sesión
+          localStorage.setItem('user_email', response.email);
+          this.successMessage.set('¡Perfil actualizado exitosamente!');
+          this.paciente.set(response);
+          this.perfilForm.patchValue({ password: '' });
+
+          setTimeout(() => {
+            this.successMessage.set('');
+          }, 5000);
+        }
       },
       error: (error) => {
         console.error('Error al actualizar perfil:', error);
         this.isLoading.set(false);
 
-        // Manejo de errores específicos
         if (error.status === 400) {
           this.errorMessage.set(error.error?.message || 'Datos inválidos');
         } else if (error.status === 404) {
