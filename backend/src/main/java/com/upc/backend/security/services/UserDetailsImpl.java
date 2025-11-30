@@ -16,7 +16,7 @@ public class UserDetailsImpl implements UserDetails {
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return usuario.getRoles()
                 .stream()
-                .map(r -> (GrantedAuthority) () -> r.getNombre().name())
+                .map(r -> (GrantedAuthority) () -> "ROLE_" + r.getNombre().name())
                 .collect(Collectors.toSet());
     }
 

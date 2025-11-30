@@ -71,9 +71,9 @@ export class ContactoMensaje {
 export class Cita {
   idCita?: number = 0;
   codigo!: number;
-  paciente!: string;
-  psicologo!: string;
-  especialidad!: string;
+  paciente!: { idPaciente: number };
+  psicologo!: { idPsicologo: number };
+  especialidad!: { idEspecialidad: number };
   hora!: string;
   precio!: number;
   descripcion!: string;

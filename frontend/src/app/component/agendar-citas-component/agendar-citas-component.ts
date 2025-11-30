@@ -1,4 +1,4 @@
-import {Component, inject, signal} from '@angular/core';
+import {Component, inject, OnInit, signal} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {FormsModule ,FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {AuthService} from '../../services/auth.service';
@@ -17,16 +17,19 @@ import {EspecialidadService} from '../../services/especialidad-service';
   templateUrl: './agendar-citas-component.html',
   styleUrl: './agendar-citas-component.css',
 })
-export class AgendarCitasComponent {
-  citaForm: FormGroup;
+export class AgendarCitasComponent implements OnInit {
+
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private roleRouting = inject(RoutingService);
+  private router = inject(Router);
+
   private citaService = inject(CitaService);
   private pacienteService = inject(PacienteService);
   private psicologoService = inject(PsicologoService);
   private especialidadService = inject(EspecialidadService);
-  private router = inject(Router);
+
+  citaForm: FormGroup;
 
   errorMessage = signal<string>('');
   successMessage = signal<string>('');
@@ -37,6 +40,10 @@ export class AgendarCitasComponent {
   especialidades: any[] = [];
 
   ngOnInit() {
+    console.log('Verificando autenticación...');
+    console.log('Token en localStorage:', localStorage.getItem('auth_token'));
+    console.log('Email en localStorage:', localStorage.getItem('user_email'));
+    console.log('Usuario actual:', this.authService.currentUser());
     this.cargarPacientes();
     this.cargarPsicologos();
     this.cargarEspecialidades();
@@ -69,6 +76,7 @@ export class AgendarCitasComponent {
       codigo: ['', [Validators.required, Validators.minLength(2)]],
       paciente: ['', Validators.required],
       psicologo: ['', Validators.required],
+      especialidad: ['', Validators.required],
       hora: ['', Validators.required],
       precio: ['', Validators.required],
       descripcion: ['', Validators.required]
@@ -91,19 +99,21 @@ export class AgendarCitasComponent {
     const cita: Cita = new Cita();
     cita.idCita = 0;
     cita.codigo = this.citaForm.value.codigo;
-    cita.paciente = this.citaForm.value.paciente;
-    cita.psicologo = this.citaForm.value.psicologo;
-    cita.especialidad = this.citaForm.value.especialidad;
+    cita.paciente = { idPaciente: this.citaForm.value.paciente };
+    cita.psicologo = { idPsicologo: this.citaForm.value.psicologo };
+    cita.especialidad = { idEspecialidad: this.citaForm.value.especialidad };
     cita.hora = this.citaForm.value.hora;
     cita.precio = this.citaForm.value.precio;
     cita.descripcion = this.citaForm.value.descripcion;
     cita.estado = "pendiente";
 
+    console.log("Cita a agendar: ", cita);
+
     this.citaService.registrar(cita).subscribe({
-      next: (data: Object): void => {
-        console.log('Registro exitoso:', Object);
-        this.successMessage.set('¡Cita agendada exitosamente!');
+      next: (response): void => {
+        console.log('Registro exitoso:', cita);
         this.isLoading.set(false);
+        this.successMessage.set('¡Cita agendada exitosamente!');
 
         this.citaForm.patchValue({
           codigo: '',

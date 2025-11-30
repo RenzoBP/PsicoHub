@@ -49,9 +49,6 @@ export class ContactComponent implements OnInit {
     this.contactoForm.patchValue({
       email: userEmail,
     });
-
-    // Si quieres que el email sea readonly pero enviable:
-    // this.contactoForm.get('email')?.disable(); // NO USAR ESTO si necesitas el valor
   }
 
   onSubmit(): void {

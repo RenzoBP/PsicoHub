@@ -14,9 +14,6 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
-
 @Service
 public class CitaService implements ICitaService {
     @Autowired
@@ -33,63 +30,29 @@ public class CitaService implements ICitaService {
 
     @Override
     public CitaDTO registrar(CitaDTO citaDTO) {
-        Paciente paciente = pacienteRepository.findByNombre(citaDTO.getPaciente().getNombre());
-        Psicologo psicologo = psicologoRepository.findByNombre(citaDTO.getPsicologo().getNombre());
-        Especialidad especialidad = especialidadRepository.findByNombre(citaDTO.getEspecialidad().getNombre());
+        Paciente paciente = pacienteRepository.findById(citaDTO.getPaciente().getIdPaciente())
+                .orElseThrow(() -> new RuntimeException("Paciente no encontrado"));
+        Psicologo psicologo = psicologoRepository.findById(citaDTO.getPsicologo().getIdPsicologo())
+                .orElseThrow(() -> new RuntimeException("Psicólogo no encontrado"));
+        Especialidad especialidad = especialidadRepository.findById(citaDTO.getEspecialidad().getIdEspecialidad())
+                .orElseThrow(() -> new RuntimeException("Especialidad no encontrada"));
 
+        if (paciente == null) throw new RuntimeException("Paciente no encontrado");
+        if (psicologo == null) throw new RuntimeException("Psicólogo no encontrado");
+        if (especialidad == null) throw new RuntimeException("Especialidad no encontrada");
+
+        // Usa ModelMapper para mapear el resto de campos
         Cita cita = modelMapper.map(citaDTO, Cita.class);
 
+        // Asignar relaciones manualmente
         cita.setPaciente(paciente);
         cita.setPsicologo(psicologo);
         cita.setEspecialidad(especialidad);
 
-        cita.setIdCita(null);
+        cita.setIdCita(null); // Forzar autogeneración
 
-        Cita citaGuardada = citaRepository.save(cita);
+        Cita guardada = citaRepository.save(cita);
 
-        return modelMapper.map(citaGuardada, CitaDTO.class);
-    }
-    @Override
-    public CitaDTO modificar(Long codigo, CitaDTO citaDTO) {
-        Cita citaExistente = citaRepository.findByCodigo(codigo);
-
-        if (citaExistente == null) {
-            throw new RuntimeException("Cita no encontrada con el código: " + codigo);
-        }
-
-        modelMapper.map(citaDTO, citaExistente);
-        citaExistente.setIdCita(codigo);
-
-        Cita citaModificada = citaRepository.save(citaExistente);
-
-        return modelMapper.map(citaModificada, CitaDTO.class);
-    }
-    @Override
-    public List<CitaDTO> listarPorPaciente(String paciente){
-        return citaRepository.listarPorPaciente(paciente)
-                .stream()
-                .map(cita -> modelMapper.map(cita, CitaDTO.class))
-                .toList();
-    }
-    @Override
-    public List<CitaDTO> listarPorPsicologo(String psicologo){
-        return citaRepository.listarPorPsicologo(psicologo)
-                .stream()
-                .map(cita -> modelMapper.map(cita, CitaDTO.class))
-                .toList();
-    }
-    @Override
-    public List<CitaDTO> listarPorEspecalidad(String especialidad){
-        return citaRepository.listarPorEspecialidad(especialidad)
-                .stream()
-                .map(cita -> modelMapper.map(cita, CitaDTO.class))
-                .toList();
-    }
-    @Override
-    public List<CitaDTO> listarCitas(){
-        return citaRepository.findAll()
-                .stream()
-                .map(cita -> modelMapper.map(cita, CitaDTO.class))
-                .toList();
+        return modelMapper.map(guardada, CitaDTO.class);
     }
 }

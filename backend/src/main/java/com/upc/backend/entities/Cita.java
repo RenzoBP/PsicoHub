@@ -1,6 +1,5 @@
 package com.upc.backend.entities;
 
-import com.upc.backend.security.entities.Usuario;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -21,15 +20,15 @@ public class Cita {
     @Column(nullable = false)
     private Long codigo;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "paciente_id", referencedColumnName = "id_paciente")
     private Paciente paciente;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "psicologo_id", referencedColumnName = "id_psicologo")
     private Psicologo psicologo;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "especialidad_id", referencedColumnName = "id_especialidad")
     private Especialidad especialidad;
 

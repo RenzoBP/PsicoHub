@@ -49,9 +49,15 @@ export class AuthService {
   }
 
   private setSession(authResult: AuthResponse): void {
+    console.log('🔐 Guardando sesión:', authResult);
+
     localStorage.setItem(this.TOKEN_KEY, authResult.token);
     localStorage.setItem('user_dni', authResult.usuario.dni);
     localStorage.setItem('user_email', authResult.usuario.email);
+
+    console.log('Token guardado:', localStorage.getItem(this.TOKEN_KEY));
+    console.log('DNI guardado:', localStorage.getItem('user_dni'));
+
     this.currentUserSignal.set(authResult.usuario);
     this.isAuthenticatedSignal.set(true);
   }

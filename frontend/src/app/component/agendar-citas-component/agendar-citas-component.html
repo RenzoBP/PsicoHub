@@ -26,6 +26,19 @@
         Complete la información para agendar una nueva cita.
       </p>
 
+      <!-- Mensajes de éxito y error -->
+      @if (successMessage()) {
+        <div class="alert alert-success">
+          {{ successMessage() }}
+        </div>
+      }
+
+      @if (errorMessage()) {
+        <div class="alert alert-error">
+          {{ errorMessage() }}
+        </div>
+      }
+
       <!-- === FORMULARIO DE CITA === -->
       <form [formGroup]="citaForm" (ngSubmit)="onSubmit()" class="auth-form">
 
@@ -41,7 +54,9 @@
           <label for="paciente">Paciente</label>
           <select id="paciente" name="paciente" formControlName="paciente" required>
             <option value="" disabled selected>Seleccione un paciente...</option>
-            <option *ngFor="let p of pacientes" [value]="p.id">{{ p.nombre }}</option>
+            <option *ngFor="let p of pacientes" [ngValue]="p.idPaciente">
+              {{ p.nombre }}
+            </option>
           </select>
           @if (getFieldError('paciente')) {
             <span class="field-error">{{ getFieldError('paciente') }}</span>
@@ -52,7 +67,9 @@
           <label for="psicologo">Psicólogo</label>
           <select id="psicologo" name="psicologo" formControlName="psicologo" required>
             <option value="" disabled selected>Seleccione un psicólogo...</option>
-            <option *ngFor="let ps of psicologos" [value]="ps.id">{{ ps.nombre }}</option>
+            <option *ngFor="let ps of psicologos" [ngValue]="ps.idPsicologo">
+              {{ ps.nombre }}
+            </option>
           </select>
           @if (getFieldError('psicologo')) {
             <span class="field-error">{{ getFieldError('psicologo') }}</span>
@@ -63,7 +80,9 @@
           <label for="especialidad">Especialidad</label>
           <select id="especialidad" name="especialidad" formControlName="especialidad" required>
             <option value="" disabled selected>Seleccione la especialidad...</option>
-            <option *ngFor="let e of especialidades" [value]="e.id">{{ e.nombre }}</option>
+            <option *ngFor="let e of especialidades" [ngValue]="e.idEspecialidad">
+              {{ e.nombre }}
+            </option>
           </select>
           @if (getFieldError('especialidad')) {
             <span class="field-error">{{ getFieldError('especialidad') }}</span>
